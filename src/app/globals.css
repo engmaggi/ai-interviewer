@@ -1,0 +1,140 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+ * Orbit design tokens (source: Figma → "Orbit Foundations").
+ * Semantic CSS variables live in :root and are mapped to Tailwind in @theme.
+ * Never use raw hex values in components — use the semantic classes below.
+ */
+
+:root {
+  /* Surfaces */
+  --background: #f6f8fc; /* color/background/canvas */
+  --foreground: #171f30; /* color/text/primary (gray/900) */
+  --card: #ffffff; /* color/surface/default */
+  --card-foreground: #171f30;
+  --popover: #ffffff;
+  --popover-foreground: #171f30;
+
+  /* Brand */
+  --primary: #5c4ae8; /* color/brand/primary (purple/600) */
+  --primary-foreground: #ffffff;
+  --primary-soft: #edebff;
+
+  /* Neutrals */
+  --secondary: #ffffff;
+  --secondary-foreground: #171f30;
+  --muted: #edf0f5;
+  --muted-foreground: #66738a; /* color/text/secondary (gray/500) */
+  --accent: #f7f7fc; /* gray/50 */
+  --accent-foreground: #171f30;
+  --border: #e3e8f0; /* color/border/default (gray/200) */
+  --input: #e3e8f0;
+  --ring: #5c4ae8;
+
+  /* Status */
+  --success: #1f9e6e; /* color/status/success */
+  --success-soft: #e3f7ed;
+  --warning: #e38530; /* color/status/warning */
+  --warning-soft: #fff2e0;
+  --destructive: #a6404d; /* color/status/error */
+  --destructive-soft: #fbeaec;
+
+  /* Sidebar (navy/900) */
+  --sidebar: #131726; /* color/background/sidebar */
+  --sidebar-foreground: #b8bfcf;
+  --sidebar-muted: #8c96ad;
+  --sidebar-accent: #302e57;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #3b404f;
+  --sidebar-avatar: #574ab8;
+
+  /* Radius scale: 6 / 10 / 14 / 20 / full */
+  --radius: 14px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-avatar: var(--sidebar-avatar);
+
+  --radius-sm: 6px;
+  --radius-control: 8px; /* buttons and inputs */
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-roboto-mono), ui-monospace, monospace;
+
+  /* Typography scale (Figma text styles) */
+  --text-display-lg: 32px;
+  --text-display-lg--line-height: 40px;
+  --text-display-lg--font-weight: 700;
+  --text-heading-lg: 24px;
+  --text-heading-lg--line-height: 32px;
+  --text-heading-lg--font-weight: 700;
+  --text-heading-md: 20px;
+  --text-heading-md--line-height: 28px;
+  --text-heading-md--font-weight: 600;
+  --text-heading-sm: 16px;
+  --text-heading-sm--line-height: 24px;
+  --text-heading-sm--font-weight: 600;
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+  --text-body-sm: 12px;
+  --text-body-sm--line-height: 18px;
+  --text-label-md: 12px;
+  --text-label-md--line-height: 16px;
+  --text-label-md--font-weight: 500;
+  --text-label-sm: 10px;
+  --text-label-sm--line-height: 14px;
+  --text-label-sm--font-weight: 600;
+  --text-code-md: 14px;
+  --text-code-md--line-height: 20px;
+  --text-code-sm: 12px;
+  --text-code-sm--line-height: 18px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply min-h-dvh bg-background text-foreground antialiased;
+  }
+}
