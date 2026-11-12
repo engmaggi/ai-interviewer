@@ -1,0 +1,85 @@
+### Optional: use with the "REST Client" extension in VS Code (humao.rest-client).
+### Click "Send Request" above any request. Cookies are kept between requests automatically.
+### Cloudflare's always-pass TEST captcha token is used below (see docs/SETUP_GUIDE.md).
+
+@base = http://localhost:3000
+
+### Health
+GET {{base}}/api/health
+
+### Developer roles (public)
+GET {{base}}/api/developer-roles
+
+### Register
+POST {{base}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "Passw0rdPassw0rd",
+  "displayName": "Alice Example",
+  "developerRole": "frontend_developer",
+  "targetSeniority": "mid",
+  "yearsOfExperience": 3,
+  "captchaToken": "XXXX.DUMMY.TOKEN.XXXX"
+}
+
+### Login (after confirming the email)
+POST {{base}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "Passw0rdPassw0rd",
+  "captchaToken": "XXXX.DUMMY.TOKEN.XXXX"
+}
+
+### My profile
+GET {{base}}/api/me
+
+### Update my profile
+PATCH {{base}}/api/me
+Content-Type: application/json
+
+{ "displayName": "Alice Updated", "developerRole": "full_stack_developer", "targetSeniority": "senior", "yearsOfExperience": 4 }
+
+### Try to promote myself (must fail with 400)
+PATCH {{base}}/api/me
+Content-Type: application/json
+
+{ "accountType": "admin" }
+
+### Logout
+POST {{base}}/api/auth/logout
+
+### Forgot password
+POST {{base}}/api/auth/forgot-password
+Content-Type: application/json
+
+{ "email": "alice@example.com", "captchaToken": "XXXX.DUMMY.TOKEN.XXXX" }
+
+### Reset password (only after clicking the emailed link, in the same browser session)
+POST {{base}}/api/auth/reset-password
+Content-Type: application/json
+
+{ "password": "NewPassw0rd123" }
+
+### ADMIN: list users (log in as an admin first)
+GET {{base}}/api/admin/users?page=1&pageSize=20&search=alice
+
+### ADMIN: promote / demote — replace USER_ID
+PATCH {{base}}/api/admin/users/USER_ID/account-type
+Content-Type: application/json
+
+{ "accountType": "admin" }
+
+### ADMIN: delete a user — replace USER_ID
+DELETE {{base}}/api/admin/users/USER_ID
+
+### ── Question bank (log in first) ─────────────────────────────────────────────
+### Topic codes: javascript, typescript, react, nextjs, html_css, testing, performance,
+### accessibility, frontend_architecture, design_systems, backend_awareness,
+### frontend_system_design, collaboration, ownership, feedback_and_learning,
+### prioritisation, problem_solving.   Domains: practice, behavioural, official.
+GET {{base}}/api/questions?assessmentDomain=practice&topic=javascript&difficulty=easy
+
