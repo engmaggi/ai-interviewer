@@ -1,0 +1,191 @@
+// Prisma schema for Orbit (auth & user management phase).
+//
+// IMPORTANT: the SQL files in prisma/migrations are the source of truth for the
+// database (they contain triggers, RLS and foreign keys into Supabase's `auth`
+// schema, which Prisma cannot express). This file must mirror them so that the
+// generated client is typed correctly. Never run `prisma migrate dev` or
+// `prisma db push` — see docs/SETUP_GUIDE.md.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AccountType {
+  user
+  admin
+
+  @@map("account_type")
+}
+
+enum TargetSeniority {
+  junior
+  mid
+  senior
+
+  @@map("target_seniority")
+}
+
+model DeveloperRole {
+  code      String    @id
+  label     String
+  sortOrder Int       @default(0) @map("sort_order")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  profiles  Profile[]
+
+  @@map("developer_roles")
+}
+
+model Profile {
+  id                String          @id @db.Uuid
+  displayName       String          @map("display_name")
+  accountType       AccountType     @default(user) @map("account_type")
+  developerRole     String          @map("developer_role")
+  targetSeniority   TargetSeniority @map("target_seniority")
+  yearsOfExperience Int             @map("years_of_experience") @db.SmallInt
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime        @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  role          DeveloperRole @relation(fields: [developerRole], references: [code])
+  auditActions  AuditLog[]
+
+  @@index([accountType])
+  @@index([developerRole])
+  @@map("profiles")
+}
+
+model AuditLog {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorId      String?  @map("actor_id") @db.Uuid
+  action       String
+  targetUserId String?  @map("target_user_id") @db.Uuid
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  actor Profile? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([actorId])
+  @@index([targetUserId])
+  @@map("audit_logs")
+}
+
+enum AssessmentDomain {
+  practice
+  behavioural
+  official
+
+  @@map("assessment_domain")
+}
+
+enum QuestionTopic {
+  javascript
+  typescript
+  react
+  nextjs
+  html_css
+  testing
+  performance
+  accessibility
+  frontend_architecture
+  design_systems
+  backend_awareness
+  frontend_system_design
+  collaboration
+  ownership
+  feedback_and_learning
+  prioritisation
+  problem_solving
+
+  @@map("question_topic")
+}
+
+enum QuestionType {
+  technical_knowledge
+  coding_challenge
+  behavioural
+  voice_followup_template
+  system_design
+
+  @@map("question_type")
+}
+
+enum QuestionDifficulty {
+  easy
+  medium
+  hard
+  adaptive
+
+  @@map("question_difficulty")
+}
+
+enum ProficiencyLevel {
+  basic
+  developing
+  proficient
+  advanced
+  all_levels
+
+  @@map("proficiency_level")
+}
+
+enum AuthoringStatus {
+  draft
+  in_review
+  published
+
+  @@map("authoring_status")
+}
+
+enum CompetencyCategory {
+  frontend
+  behavioural
+
+  @@map("competency_category")
+}
+
+model Competency {
+  competencyId   String             @id @map("competency_id")
+  competencyName String             @map("competency_name")
+  category       CompetencyCategory
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  questions      Question[]
+
+  @@map("competencies")
+}
+
+model Question {
+  questionId               String              @map("question_id")
+  version                  Int                 @default(1)
+  questionType             QuestionType        @map("question_type")
+  assessmentDomain         AssessmentDomain    @map("assessment_domain")
+  topic                    QuestionTopic
+  competencyId             String              @map("competency_id")
+  title                    String
+  questionPrompt           String              @map("question_prompt")
+  starterCode              String?             @map("starter_code")
+  visibleExample           String?             @map("visible_example")
+  // Server-only columns: never selected by the public API.
+  expectedAnswerOrEvidence String?             @map("expected_answer_or_evidence")
+  evaluationRubric         String?             @map("evaluation_rubric")
+  validationNotes          String?             @map("validation_notes")
+  accessRule               String?             @map("access_rule")
+  targetProficiency        ProficiencyLevel?   @map("target_proficiency")
+  difficulty               QuestionDifficulty?
+  authoringStatus          AuthoringStatus     @default(draft) @map("authoring_status")
+  tags                     String[]            @default([])
+  createdAt                DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                DateTime            @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  competency Competency @relation(fields: [competencyId], references: [competencyId])
+
+  @@id([questionId, version])
+  @@index([assessmentDomain, topic])
+  @@index([competencyId])
+  @@map("questions")
+}
