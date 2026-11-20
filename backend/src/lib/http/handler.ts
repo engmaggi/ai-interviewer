@@ -13,9 +13,20 @@ const STATE_CHANGING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
  * Origin header on cross-site POST/PATCH/DELETE, so if it is present it must be us.
  * (Tools such as curl send no Origin and pass.)
  */
+
+/** Our own origin plus any extra frontend origins listed in ALLOWED_ORIGINS (comma-separated). */
+function allowedOrigins(): Set<string> {
+  const own = new URL(publicEnv().NEXT_PUBLIC_APP_URL).origin;
+  const extra = (process.env.ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((s) => s.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+  return new Set([own, ...extra]);
+}
+
 function assertSameOrigin(req: NextRequest) {
   const origin = req.headers.get("origin");
-  if (origin && origin !== new URL(publicEnv().NEXT_PUBLIC_APP_URL).origin) {
+  if (origin && !allowedOrigins().has(origin)) {
     throw new ForbiddenError("Cross-origin requests are not allowed.", "BAD_ORIGIN");
   }
 }
