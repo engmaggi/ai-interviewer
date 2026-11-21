@@ -1,15 +1,11 @@
 /** Returns the public Supabase credentials, or null while they are not configured (e.g. before `.env.local` exists). */
 export function getSupabaseEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-  if (!url || !anonKey) return null;
+  if (!url || !publishableKey) return null;
 
-  return { url, anonKey };
-}
-
-export function getSiteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  return { url, publishableKey };
 }
 
 export const SUPABASE_NOT_CONFIGURED_MESSAGE =

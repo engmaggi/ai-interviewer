@@ -12,7 +12,7 @@ export async function createClient() {
 
   const cookieStore = await cookies();
 
-  return createServerClient(env.url, env.anonKey, {
+  return createServerClient(env.url, env.publishableKey, {
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (cookiesToSet) => {

@@ -10,7 +10,7 @@ export async function updateSession(request: NextRequest) {
   const env = getSupabaseEnv();
   if (!env) return { response, user: null, isConfigured: false };
 
-  const supabase = createServerClient(env.url, env.anonKey, {
+  const supabase = createServerClient(env.url, env.publishableKey, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (cookiesToSet) => {

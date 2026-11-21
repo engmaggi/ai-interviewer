@@ -9,7 +9,13 @@ const PUBLIC_PAGES = [
   "/register",
   "/verify-email",
   "/forgot-password",
+  "/reset-password",
 ];
+
+/** Backend paths (rewritten to the backend locally). The backend runs its own auth guards. */
+function isBackendPath(pathname: string) {
+  return pathname.startsWith("/api/") || pathname.startsWith("/auth/");
+}
 
 /**
  * Refreshes the session and gates routes by sign-in state.
@@ -21,11 +27,17 @@ export async function proxy(request: NextRequest) {
   // Before Supabase is configured there is no session to gate on.
   if (!isConfigured) return response;
 
-  const { pathname } = request.nextUrl;
-  const isPublic =
-    PUBLIC_PAGES.includes(pathname) || pathname.startsWith("/auth/");
+  const { pathname, searchParams } = request.nextUrl;
+  if (isBackendPath(pathname)) return response;
 
-  if (!user && !isPublic) return redirectTo(request, response, "/sign-in");
+  // The backend's /auth/confirm sends failed email links here.
+  if (pathname === "/" && searchParams.has("auth_error")) {
+    return redirectTo(request, response, "/verify-email", "?status=expired");
+  }
+
+  if (!user && !PUBLIC_PAGES.includes(pathname)) {
+    return redirectTo(request, response, "/sign-in");
+  }
 
   if (user && (AUTH_PAGES.includes(pathname) || pathname === "/")) {
     return redirectTo(request, response, "/overview");
@@ -39,10 +51,11 @@ function redirectTo(
   request: NextRequest,
   response: NextResponse,
   pathname: string,
+  search = "",
 ) {
   const url = request.nextUrl.clone();
   url.pathname = pathname;
-  url.search = "";
+  url.search = search;
 
   const redirect = NextResponse.redirect(url);
   for (const cookie of response.cookies.getAll()) redirect.cookies.set(cookie);

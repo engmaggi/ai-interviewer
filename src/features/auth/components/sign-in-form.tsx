@@ -1,21 +1,29 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { FormField } from "@/components/shared/form-field";
+import { Turnstile, useCaptcha } from "@/components/shared/turnstile";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ApiError } from "@/lib/api/client";
+import { applyApiError } from "@/lib/api/form-errors";
 
-import { signInAction } from "../actions";
+import { authApi, verifyEmailPath } from "../api";
 import { signInSchema, type SignInValues } from "../schemas";
 import { AuthCard } from "./auth-card";
 
+const FIELD_NAMES = ["email", "password"] as const;
+
 export function SignInForm() {
+  const router = useRouter();
+  const captcha = useCaptcha();
   const [serverError, setServerError] = useState<string>();
-  const [isPending, startTransition] = useTransition();
 
   const {
     register,
@@ -27,17 +35,31 @@ export function SignInForm() {
     defaultValues: { email: "", password: "" },
   });
 
-  const onSubmit = handleSubmit((values) => {
-    setServerError(undefined);
-
-    startTransition(async () => {
-      const result = await signInAction(values);
-
-      setServerError(result.error);
-      for (const [field, message] of Object.entries(result.fieldErrors ?? {})) {
-        setError(field as keyof SignInValues, { message });
+  const signIn = useMutation({
+    mutationFn: authApi.login,
+    onSuccess: () => {
+      router.replace("/overview");
+      router.refresh();
+    },
+    onError: (error, { email }) => {
+      if (error instanceof ApiError && error.code === "EMAIL_NOT_CONFIRMED") {
+        router.push(verifyEmailPath(email));
+        return;
       }
-    });
+
+      setServerError(applyApiError(error, setError, FIELD_NAMES));
+      captcha.reset();
+    },
+  });
+
+  const onSubmit = handleSubmit((values) => {
+    if (!captcha.token) {
+      setServerError("Complete the security check first.");
+      return;
+    }
+
+    setServerError(undefined);
+    signIn.mutate({ ...values, captchaToken: captcha.token });
   });
 
   return (
@@ -73,7 +95,14 @@ export function SignInForm() {
           Forgot password?
         </Link>
 
-        <Button type="submit" size="lg" loading={isPending} className="w-full">
+        <Turnstile key={captcha.widgetKey} onTokenChange={captcha.setToken} />
+
+        <Button
+          type="submit"
+          size="lg"
+          loading={signIn.isPending}
+          className="w-full"
+        >
           Sign in
         </Button>
       </form>

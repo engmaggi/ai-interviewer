@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { NavItem } from "@/config/navigation";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import type { SessionUser } from "@/features/auth/types";
-import { DEVELOPER_LEVEL_LABELS } from "@/lib/constants/user";
+import { TARGET_SENIORITY_LABELS } from "@/lib/constants/user";
 import { getInitials } from "@/lib/format";
 
 import { Logo } from "../shared/logo";
@@ -52,15 +52,17 @@ export function Sidebar({ items, subtitle, user }: SidebarProps) {
           aria-hidden
           className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-sidebar-avatar text-label-sm text-white"
         >
-          {getInitials(user.fullName)}
+          {getInitials(user.displayName)}
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-label-md text-white">{user.fullName}</p>
+          <p className="truncate text-label-md text-white">
+            {user.displayName}
+          </p>
           <p className="truncate text-label-sm text-sidebar-muted">
-            {user.role === "admin"
+            {user.accountType === "admin"
               ? "Administrator"
-              : `${DEVELOPER_LEVEL_LABELS[user.level]} developer`}
+              : `${TARGET_SENIORITY_LABELS[user.targetSeniority]} ${user.developerRole.label}`}
           </p>
         </div>
 

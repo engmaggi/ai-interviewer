@@ -3,9 +3,9 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
+import { ApiError } from "@/lib/api/client";
+import { serverApi } from "@/lib/api/server";
 import { getSupabaseEnv } from "@/lib/supabase/env";
-import { isDeveloperLevel, isUserRole } from "@/lib/constants/user";
 
 import type { SessionUser } from "../types";
 
@@ -16,39 +16,32 @@ import type { SessionUser } from "../types";
 function getDevelopmentUser(): SessionUser | null {
   if (process.env.NODE_ENV !== "development") return null;
 
+  const now = new Date().toISOString();
+
   return {
     id: "dev-user",
     email: "maggi@example.com",
-    fullName: "Maggi Mamdouh",
-    level: "mid",
-    role: process.env.DEV_MOCK_ROLE === "admin" ? "admin" : "candidate",
+    displayName: "Maggi Mamdouh",
+    accountType: process.env.DEV_MOCK_ROLE === "admin" ? "admin" : "user",
+    developerRole: { code: "frontend_developer", label: "Frontend Developer" },
+    targetSeniority: "mid",
+    yearsOfExperience: 6,
+    createdAt: now,
+    updatedAt: now,
   };
 }
 
-/** Current user + profile, deduplicated per request. Returns null when signed out. */
+/** Current user's profile from `GET /api/me`, deduplicated per request. Returns null when signed out. */
 export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   if (!getSupabaseEnv()) return getDevelopmentUser();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return null;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, level, role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  return {
-    id: user.id,
-    email: user.email ?? "",
-    fullName: profile?.full_name || user.email || "Orbit user",
-    level: isDeveloperLevel(profile?.level) ? profile.level : "junior",
-    role: isUserRole(profile?.role) ? profile.role : "candidate",
-  };
+  try {
+    return await serverApi.get<SessionUser>("/api/me");
+  } catch (error) {
+    // 401 covers both "no session" and "account deleted" (ACCOUNT_NOT_FOUND).
+    if (error instanceof ApiError && error.status === 401) return null;
+    throw error;
+  }
 });
 
 export async function requireUser(): Promise<SessionUser> {
@@ -60,7 +53,7 @@ export async function requireUser(): Promise<SessionUser> {
 
 export async function requireAdmin(): Promise<SessionUser> {
   const user = await requireUser();
-  if (user.role !== "admin") redirect("/overview");
+  if (user.accountType !== "admin") redirect("/overview");
 
   return user;
 }
