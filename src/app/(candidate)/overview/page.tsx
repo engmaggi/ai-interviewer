@@ -18,7 +18,7 @@ export default async function OverviewPage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="text-heading-lg">
-          Welcome back, {getFirstName(user.fullName)} 👋
+          Welcome back, {getFirstName(user.displayName)} 👋
         </h1>
         <p className="text-body-sm text-muted-foreground">
           Your frontend career snapshot and next best steps.

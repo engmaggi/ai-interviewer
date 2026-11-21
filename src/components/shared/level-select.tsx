@@ -4,23 +4,23 @@ import { useId } from "react";
 
 import { RadioGroup, RadioGroupOption } from "@/components/ui/radio-group";
 import {
-  DEVELOPER_LEVELS,
-  DEVELOPER_LEVEL_LABELS,
-  type DeveloperLevel,
+  TARGET_SENIORITIES,
+  TARGET_SENIORITY_LABELS,
+  type TargetSeniority,
 } from "@/lib/constants/user";
 
 type LevelSelectProps = {
   label?: string;
   name?: string;
-  value?: DeveloperLevel;
-  onValueChange: (level: DeveloperLevel) => void;
+  value?: TargetSeniority;
+  onValueChange: (level: TargetSeniority) => void;
   error?: string;
   disabled?: boolean;
 };
 
 /** Figma "Role Option" group: single-select Junior / Mid / Senior with radio semantics. */
 export function LevelSelect({
-  label = "Current developer level",
+  label = "Target level",
   name,
   value,
   onValueChange,
@@ -43,11 +43,11 @@ export function LevelSelect({
         aria-labelledby={labelId}
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? true : undefined}
-        onValueChange={(next) => onValueChange(next as DeveloperLevel)}
+        onValueChange={(next) => onValueChange(next as TargetSeniority)}
       >
-        {DEVELOPER_LEVELS.map((level) => (
+        {TARGET_SENIORITIES.map((level) => (
           <RadioGroupOption key={level} value={level}>
-            {DEVELOPER_LEVEL_LABELS[level]}
+            {TARGET_SENIORITY_LABELS[level]}
           </RadioGroupOption>
         ))}
       </RadioGroup>

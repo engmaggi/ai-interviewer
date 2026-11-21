@@ -1,25 +1,27 @@
 /** Self-reported seniority chosen at registration. This is NOT the assessed level. */
-export const DEVELOPER_LEVELS = ["junior", "mid", "senior"] as const;
-export type DeveloperLevel = (typeof DEVELOPER_LEVELS)[number];
+export const TARGET_SENIORITIES = ["junior", "mid", "senior"] as const;
+export type TargetSeniority = (typeof TARGET_SENIORITIES)[number];
 
-export const DEVELOPER_LEVEL_LABELS: Record<DeveloperLevel, string> = {
+export const TARGET_SENIORITY_LABELS: Record<TargetSeniority, string> = {
   junior: "Junior",
   mid: "Mid",
   senior: "Senior",
 };
 
-export const USER_ROLES = ["candidate", "admin"] as const;
-export type UserRole = (typeof USER_ROLES)[number];
+export const ACCOUNT_TYPES = ["user", "admin"] as const;
+export type AccountType = (typeof ACCOUNT_TYPES)[number];
 
-export const USER_ROLE_LABELS: Record<UserRole, string> = {
-  candidate: "Candidate",
+export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
+  user: "Candidate",
   admin: "Admin",
 };
 
-export function isDeveloperLevel(value: unknown): value is DeveloperLevel {
-  return (DEVELOPER_LEVELS as readonly string[]).includes(value as string);
+export const MAX_YEARS_OF_EXPERIENCE = 60;
+
+export function isTargetSeniority(value: unknown): value is TargetSeniority {
+  return (TARGET_SENIORITIES as readonly string[]).includes(value as string);
 }
 
-export function isUserRole(value: unknown): value is UserRole {
-  return (USER_ROLES as readonly string[]).includes(value as string);
+export function isAccountType(value: unknown): value is AccountType {
+  return (ACCOUNT_TYPES as readonly string[]).includes(value as string);
 }
