@@ -7,7 +7,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DEVELOPER_LEVEL_LABELS, USER_ROLE_LABELS } from "@/lib/constants/user";
+import {
+  ACCOUNT_TYPE_LABELS,
+  TARGET_SENIORITY_LABELS,
+} from "@/lib/constants/user";
 
 import type { AdminUser } from "../types";
 import { DeleteUserDialog } from "./delete-user-dialog";
@@ -26,8 +29,8 @@ export function UsersTable({ users, currentUserId }: UsersTableProps) {
       <TableHeader>
         <TableRow className="hover:bg-transparent">
           <TableHead>User</TableHead>
-          <TableHead className="hidden sm:table-cell">Level</TableHead>
-          <TableHead>Role</TableHead>
+          <TableHead className="hidden sm:table-cell">Seniority</TableHead>
+          <TableHead>Account</TableHead>
           <TableHead className="hidden md:table-cell">Joined</TableHead>
           <TableHead className="text-right">
             <span className="sr-only">Actions</span>
@@ -53,19 +56,23 @@ export function UsersTable({ users, currentUserId }: UsersTableProps) {
           return (
             <TableRow key={user.id}>
               <TableCell className="max-w-[16rem]">
-                <p className="truncate text-label-md">{user.fullName || "—"}</p>
+                <p className="truncate text-label-md">
+                  {user.displayName || "—"}
+                </p>
                 <p className="truncate text-body-sm text-muted-foreground">
-                  {user.email}
+                  {user.email ?? user.developerRole}
                 </p>
               </TableCell>
 
               <TableCell className="hidden sm:table-cell">
-                {DEVELOPER_LEVEL_LABELS[user.level]}
+                {TARGET_SENIORITY_LABELS[user.targetSeniority]}
               </TableCell>
 
               <TableCell>
-                <Badge status={user.role === "admin" ? "brand" : "neutral"}>
-                  {USER_ROLE_LABELS[user.role]}
+                <Badge
+                  status={user.accountType === "admin" ? "brand" : "neutral"}
+                >
+                  {ACCOUNT_TYPE_LABELS[user.accountType]}
                 </Badge>
               </TableCell>
 

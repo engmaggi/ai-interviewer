@@ -51,7 +51,7 @@ export function DeleteUserDialog({ user }: { user: AdminUser }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={`Delete ${user.fullName}`}
+            aria-label={`Delete ${user.displayName}`}
             className="text-destructive hover:bg-destructive-soft"
           />
         }
@@ -63,8 +63,9 @@ export function DeleteUserDialog({ user }: { user: AdminUser }) {
         <DialogHeader>
           <DialogTitle>Delete this user?</DialogTitle>
           <DialogDescription>
-            {user.fullName} ({user.email}) will lose access and their profile
-            will be removed. This can&apos;t be undone.
+            {user.displayName}
+            {user.email ? ` (${user.email})` : ""} will lose access and their
+            profile will be removed. This can&apos;t be undone.
           </DialogDescription>
         </DialogHeader>
 

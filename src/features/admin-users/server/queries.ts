@@ -1,6 +1,9 @@
 import "server-only";
 
-import { isDeveloperLevel, isUserRole } from "@/lib/constants/user";
+import {
+  isAccountType,
+  isTargetSeniority,
+} from "@/lib/constants/user";
 
 import type { AdminUser } from "../types";
 import {
@@ -20,7 +23,9 @@ export async function listUsers(): Promise<{
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, email, full_name, level, role, created_at")
+    .select(
+      "id, display_name, account_type, developer_role, target_seniority, years_of_experience, created_at",
+    )
     .order("created_at", { ascending: false })
     .limit(MAX_USERS);
 
@@ -32,10 +37,16 @@ export async function listUsers(): Promise<{
 
   const users = (data ?? []).map((row) => ({
     id: row.id as string,
-    email: row.email as string,
-    fullName: row.full_name as string,
-    level: isDeveloperLevel(row.level) ? row.level : "junior",
-    role: isUserRole(row.role) ? row.role : "candidate",
+    email: null,
+    displayName: row.display_name as string,
+    accountType: isAccountType(row.account_type) ? row.account_type : "user",
+    developerRole: String(row.developer_role ?? ""),
+    targetSeniority: isTargetSeniority(row.target_seniority)
+      ? row.target_seniority
+      : "junior",
+    yearsOfExperience: Number(row.years_of_experience ?? 0),
+    emailConfirmedAt: null,
+    lastSignInAt: null,
     createdAt: row.created_at as string,
   }));
 

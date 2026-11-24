@@ -1,19 +1,28 @@
 import { z } from "zod";
 
-import { USER_ROLES } from "@/lib/constants/user";
 import {
+  ACCOUNT_TYPES,
+  MAX_YEARS_OF_EXPERIENCE,
+} from "@/lib/constants/user";
+import {
+  displayNameSchema,
   emailSchema,
-  fullNameSchema,
-  levelSchema,
   passwordSchema,
+  targetSenioritySchema,
 } from "@/features/auth/schemas";
 
 /** Fields shared by the create and edit forms. `password` is only used when creating. */
 export const userFormSchema = z.object({
-  fullName: fullNameSchema,
+  displayName: displayNameSchema,
   email: emailSchema,
-  level: levelSchema,
-  role: z.enum(USER_ROLES),
+  targetSeniority: targetSenioritySchema,
+  accountType: z.enum(ACCOUNT_TYPES),
+  developerRole: z.string().min(1, "Choose a developer role").max(50),
+  yearsOfExperience: z
+    .number({ error: "Enter years of experience" })
+    .int("Use whole years")
+    .min(0, "Can't be negative")
+    .max(MAX_YEARS_OF_EXPERIENCE, `Use ${MAX_YEARS_OF_EXPERIENCE} or fewer`),
   password: z.string().optional(),
 });
 

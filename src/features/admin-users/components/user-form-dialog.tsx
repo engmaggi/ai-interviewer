@@ -22,7 +22,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { passwordSchema } from "@/features/auth/schemas";
-import { USER_ROLES, USER_ROLE_LABELS } from "@/lib/constants/user";
+import {
+  ACCOUNT_TYPES,
+  ACCOUNT_TYPE_LABELS,
+} from "@/lib/constants/user";
 
 import { createUserAction, updateUserAction } from "../actions";
 import { userFormSchema, type UserFormValues } from "../schemas";
@@ -45,7 +48,7 @@ export function UserFormDialog({ user, currentUserId }: UserFormDialogProps) {
             <Button
               variant="ghost"
               size="icon"
-              aria-label={`Edit ${user.fullName}`}
+              aria-label={`Edit ${user.displayName}`}
             />
           }
         >
@@ -78,7 +81,7 @@ type UserFormProps = {
 
 /** Mounted only while the dialog is open, so every open starts from fresh values. */
 function UserForm({ user, isSelf, onDone }: UserFormProps) {
-  const roleFieldId = useId();
+  const accountTypeFieldId = useId();
   const [serverError, setServerError] = useState<string>();
   const [isPending, startTransition] = useTransition();
 
@@ -91,10 +94,12 @@ function UserForm({ user, isSelf, onDone }: UserFormProps) {
   } = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      fullName: user?.fullName ?? "",
+      displayName: user?.displayName ?? "",
       email: user?.email ?? "",
-      level: user?.level ?? "junior",
-      role: user?.role ?? "candidate",
+      targetSeniority: user?.targetSeniority ?? "junior",
+      accountType: user?.accountType ?? "user",
+      developerRole: user?.developerRole ?? "frontend_developer",
+      yearsOfExperience: user?.yearsOfExperience ?? 0,
       password: "",
     },
   });
@@ -148,8 +153,8 @@ function UserForm({ user, isSelf, onDone }: UserFormProps) {
       <FormField
         label="Full name"
         autoComplete="off"
-        error={errors.fullName?.message}
-        {...register("fullName")}
+        error={errors.displayName?.message}
+        {...register("displayName")}
       />
 
       <FormField
@@ -171,32 +176,53 @@ function UserForm({ user, isSelf, onDone }: UserFormProps) {
         />
       )}
 
+      <FormField
+        label="Developer role code"
+        autoComplete="off"
+        helperText="e.g. frontend_developer"
+        error={errors.developerRole?.message}
+        {...register("developerRole")}
+      />
+
+      <FormField
+        label="Years of experience"
+        type="number"
+        inputMode="numeric"
+        min={0}
+        error={errors.yearsOfExperience?.message}
+        {...register("yearsOfExperience", { valueAsNumber: true })}
+      />
+
       <Controller
         control={control}
-        name="level"
+        name="targetSeniority"
         render={({ field }) => (
           <LevelSelect
-            label="Developer level"
+            label="Target seniority"
             name={field.name}
             value={field.value}
             onValueChange={field.onChange}
-            error={errors.level?.message}
+            error={errors.targetSeniority?.message}
           />
         )}
       />
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={roleFieldId}>Role</Label>
-        <Select id={roleFieldId} disabled={isSelf} {...register("role")}>
-          {USER_ROLES.map((role) => (
-            <option key={role} value={role}>
-              {USER_ROLE_LABELS[role]}
+        <Label htmlFor={accountTypeFieldId}>Account type</Label>
+        <Select
+          id={accountTypeFieldId}
+          disabled={isSelf}
+          {...register("accountType")}
+        >
+          {ACCOUNT_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {ACCOUNT_TYPE_LABELS[type]}
             </option>
           ))}
         </Select>
         {isSelf && (
           <p className="text-[11px] text-muted-foreground">
-            You can&apos;t change your own role.
+            You can&apos;t change your own account type.
           </p>
         )}
       </div>

@@ -39,14 +39,27 @@ export async function createUserAction(
   const supabase = tryCreateAdminClient();
   if (!supabase) return { error: ADMIN_NOT_CONFIGURED_MESSAGE };
 
-  const { fullName, email, level, role, password } = parsed.data;
+  const {
+    displayName,
+    email,
+    targetSeniority,
+    accountType,
+    developerRole,
+    yearsOfExperience,
+    password,
+  } = parsed.data;
 
   const { data, error } = await supabase.auth.admin.createUser({
     email,
     password,
     // Admin-created accounts are trusted, so they skip the verification email.
     email_confirm: true,
-    user_metadata: { full_name: fullName, level },
+    user_metadata: {
+      display_name: displayName,
+      developer_role: developerRole,
+      target_seniority: targetSeniority,
+      years_of_experience: yearsOfExperience,
+    },
   });
 
   if (error || !data.user) {
@@ -60,10 +73,15 @@ export async function createUserAction(
     return { error: "We couldn't create the user. Please try again." };
   }
 
-  // The signup trigger creates the profile; upsert also covers the role and a missing trigger.
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .upsert({ id: data.user.id, email, full_name: fullName, level, role });
+  // The signup trigger creates the profile; upsert covers account type and a missing trigger.
+  const { error: profileError } = await supabase.from("profiles").upsert({
+    id: data.user.id,
+    display_name: displayName,
+    account_type: accountType,
+    developer_role: developerRole,
+    target_seniority: targetSeniority,
+    years_of_experience: yearsOfExperience,
+  });
 
   if (profileError)
     return {
@@ -87,9 +105,17 @@ export async function updateUserAction(
     };
   }
 
-  const { id, fullName, email, level, role } = parsed.data;
+  const {
+    id,
+    displayName,
+    email,
+    targetSeniority,
+    accountType,
+    developerRole,
+    yearsOfExperience,
+  } = parsed.data;
 
-  if (id === admin.id && role !== "admin") {
+  if (id === admin.id && accountType !== "admin") {
     return { error: "You can't remove your own admin role." };
   }
 
@@ -99,7 +125,12 @@ export async function updateUserAction(
   const { error } = await supabase.auth.admin.updateUserById(id, {
     email,
     email_confirm: true,
-    user_metadata: { full_name: fullName, level },
+    user_metadata: {
+      display_name: displayName,
+      developer_role: developerRole,
+      target_seniority: targetSeniority,
+      years_of_experience: yearsOfExperience,
+    },
   });
 
   if (error) {
@@ -113,9 +144,14 @@ export async function updateUserAction(
     return { error: "We couldn't update the user. Please try again." };
   }
 
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .upsert({ id, email, full_name: fullName, level, role });
+  const { error: profileError } = await supabase.from("profiles").upsert({
+    id,
+    display_name: displayName,
+    account_type: accountType,
+    developer_role: developerRole,
+    target_seniority: targetSeniority,
+    years_of_experience: yearsOfExperience,
+  });
 
   if (profileError)
     return { error: "We couldn't save the profile. Please try again." };
