@@ -26,7 +26,7 @@ jest.mock("@/features/developer-roles/api", () => ({
 jest.mock("@tanstack/react-query", () => ({
   useQuery: () => ({
     data: [
-      { code: "frontend", label: "Frontend Developer" },
+      { code: "frontend_developer", label: "Frontend Developer" },
     ],
     isPending: false,
     isError: false,
@@ -106,7 +106,7 @@ describe("RegisterForm", () => {
     await user.type(screen.getByPlaceholderText("Your name"), "John Doe");
     await user.selectOptions(
       screen.getByRole("combobox", { name: /developer role/i }),
-      "frontend",
+      "frontend_developer",
     );
     await user.click(screen.getByRole("radio", { name: "Junior" }));
     await user.type(screen.getByPlaceholderText("0"), "2");
@@ -118,7 +118,7 @@ describe("RegisterForm", () => {
     await waitFor(() => {
       expect(mockRegister).toHaveBeenCalledWith({
         displayName: "John Doe",
-        developerRole: "frontend",
+        developerRole: "frontend_developer",
         targetSeniority: "junior",
         yearsOfExperience: 2,
         email: "john@example.com",
