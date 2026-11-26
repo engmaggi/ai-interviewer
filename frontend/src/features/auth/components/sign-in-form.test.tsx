@@ -1,11 +1,15 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SignInForm } from "./sign-in-form";
+import { ApiError } from "@/lib/api/client";
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 const mockRefresh = jest.fn();
 const mockLogin = jest.fn();
+const mockReset = jest.fn();
+const mockSetToken = jest.fn();
+let mockCaptchaToken: string | null = "test-captcha-token";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -43,9 +47,9 @@ jest.mock("@tanstack/react-query", () => ({
 
 jest.mock("@/components/shared/turnstile", () => ({
   useCaptcha: () => ({
-    token: "test-captcha-token",
-    setToken: jest.fn(),
-    reset: jest.fn(),
+    token: mockCaptchaToken,
+    setToken: mockSetToken,
+    reset: mockReset,
     widgetKey: "test",
   }),
   Turnstile: () => <div>Security check</div>,
@@ -119,5 +123,58 @@ describe("SignInForm", () => {
 
     expect(mockReplace).toHaveBeenCalledWith("/overview");
     expect(mockRefresh).toHaveBeenCalled();
+  });
+  test("displays an error when the server rejects the sign-in details", async () => {
+    const user = userEvent.setup();
+
+    mockLogin.mockRejectedValue(
+      new ApiError(401, "INVALID_CREDENTIALS", "Invalid email or password."),
+    );
+
+    render(<SignInForm />);
+
+    await user.type(
+      screen.getByPlaceholderText("you@example.com"),
+      "john@example.com",
+    );
+
+    await user.type(
+      screen.getByPlaceholderText("Enter your password"),
+      "wrongpassword",
+    );
+
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+    expect(
+      await screen.findByText("Invalid email or password."),
+    ).toBeInTheDocument();
+
+    expect(mockReset).toHaveBeenCalled();
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+  test("prevents sign-in when the security check is not completed", async () => {
+    const user = userEvent.setup();
+
+    mockCaptchaToken = null;
+
+    render(<SignInForm />);
+
+    await user.type(
+      screen.getByPlaceholderText("you@example.com"),
+      "john@example.com",
+    );
+
+    await user.type(
+      screen.getByPlaceholderText("Enter your password"),
+      "password123",
+    );
+
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+    expect(
+      await screen.findByText("Complete the security check first."),
+    ).toBeInTheDocument();
+
+    expect(mockLogin).not.toHaveBeenCalled();
   });
 });
