@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Inter, Roboto_Mono } from "next/font/google";
 
 import { QueryProvider } from "@/providers/query-provider";
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
     "Practice, get assessed and grow as a frontend developer with evidence-based results.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${robotoMono.variable}`}>
       <body>
