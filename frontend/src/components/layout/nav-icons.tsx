@@ -2,6 +2,7 @@ import {
   ClipboardCheck,
   CircleUserRound,
   LayoutDashboard,
+  MessageSquare,
   Search,
   TrendingUp,
   Users,
@@ -13,6 +14,7 @@ import type { NavIconName } from "@/config/navigation";
 const navIcons: Record<NavIconName, LucideIcon> = {
   overview: LayoutDashboard,
   assessments: ClipboardCheck,
+  interview: MessageSquare,
   skills: CircleUserRound,
   learning: TrendingUp,
   jobs: Search,
