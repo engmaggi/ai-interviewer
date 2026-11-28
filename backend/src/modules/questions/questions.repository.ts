@@ -43,4 +43,18 @@ export const questionsRepository = {
       select: candidateVisible,
     });
   },
+    async findByQuestionId(
+    tx: Prisma.TransactionClient,
+    questionId: string,
+  ): Promise<QuestionRow | null> {
+    return tx.question.findFirst({
+      where: {
+        questionId,
+        authoringStatus: "published",
+        questionType: { not: "voice_followup_template" },
+      },
+      orderBy: { version: "desc" },
+      select: candidateVisible,
+    });
+  },
 };

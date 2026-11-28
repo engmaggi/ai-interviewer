@@ -153,7 +153,7 @@ async function main() {
         const data = q as never as Parameters<typeof tx.question.create>[0]["data"];
         await tx.question.upsert({ where: { questionId_version: { questionId: q.questionId, version: q.version } }, create: data, update: data });
       }
-    });
+    }, { timeout: 30000 });
     console.log("✔ Import finished.");
   } finally {
     await prisma.$disconnect();

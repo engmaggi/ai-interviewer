@@ -34,4 +34,11 @@ export const questionsService = {
     // Rows are ordered newest version first within each question id.
     return rows.filter((r) => !seen.has(r.questionId) && seen.add(r.questionId)).map(toDto);
   },
+    async findByQuestionId(userId: string, questionId: string): Promise<QuestionDto | null> {
+    const row = await withUserContext(userId, (tx) =>
+      questionsRepository.findByQuestionId(tx, questionId),
+    );
+
+    return row ? toDto(row) : null;
+  },
 };

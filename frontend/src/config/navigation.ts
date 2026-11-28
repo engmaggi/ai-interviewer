@@ -1,5 +1,5 @@
 export type NavIconName =
-  "overview" | "assessments" | "skills" | "learning" | "jobs" | "users";
+  "overview" | "assessments" | "interview" | "skills" | "learning" | "jobs" | "users";
 
 export interface NavItem {
   label: string;

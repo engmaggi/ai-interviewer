@@ -55,7 +55,7 @@ export function Button({
       data-slot="button"
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={cn(buttonVariants({ variant, size }), className)}
+      className={cn(buttonVariants({ variant, size }), "cursor-pointer", className)}
       {...props}
     >
       {loading ? <Loader2 className="animate-spin" aria-hidden /> : leadingIcon}
